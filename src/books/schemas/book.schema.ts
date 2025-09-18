@@ -10,13 +10,31 @@ export class Book {
   title: string;
 
   @Prop()
-  author: string;
+  subtitle: string;
 
   @Prop()
-  publishedYear: number;
+  authors: string[];
 
   @Prop()
-  type: string;
+  published_year: number;
+
+  @Prop()
+  categories: string[];
+
+  @Prop()
+  thumbnail: string;
+
+  @Prop()
+  description: string;
+
+  @Prop()
+  average_rating: number;
+
+  @Prop()
+  num_pages: number;
+
+  @Prop()
+  ratings_count: number;
 
   @Prop({ type: Object })
   createdBy: {
