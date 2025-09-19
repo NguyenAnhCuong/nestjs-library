@@ -122,4 +122,8 @@ export class UsersService {
   checkUserPassword(hashPassword: string, password: string): boolean {
     return compareSync(password, hashPassword);
   }
+
+  updateUserToken = async (refreshToken: string, _id: string) => {
+    return await this.UserModel.updateOne({ _id }, { refreshToken });
+  };
 }

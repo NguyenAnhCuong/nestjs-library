@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Request, Res, UseGuards } from '@nestjs/common';
 import { AppService } from './app.service';
 import { LocalAuthGuard } from './auth/local-auth.guard';
 import { AuthService } from './auth/auth.service';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
-import { Public } from './decorator/customize';
+import { Public, ResponseMessage } from './decorator/customize';
+import { Response } from 'express';
 
 @Controller()
 export class AppController {
@@ -15,8 +16,11 @@ export class AppController {
   @UseGuards(LocalAuthGuard)
   @Public()
   @Post('/login')
-  async handleLogin(@Request() req) {
-    return this.authService.login(req.user);
+  @ResponseMessage('User login')
+  async handleLogin(@Request() req, @Res({ passthrough: true }) res: Response) {
+    console.log('req.user', req.user);
+
+    return this.authService.login(req.user, res);
   }
 
   // @UseGuards(JwtAuthGuard)
