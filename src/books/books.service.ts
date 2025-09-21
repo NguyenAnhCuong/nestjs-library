@@ -4,6 +4,7 @@ import { UpdateBookDto } from './dto/update-book.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Book, BookDocument } from './schemas/book.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
+import { IUser } from 'src/users/user.interface';
 
 @Injectable()
 export class BooksService {
@@ -30,7 +31,6 @@ export class BooksService {
       .limit(defaultLimit)
       .sort(sort as any)
       .populate(population)
-      .select('-password')
       .exec();
 
     return {
@@ -55,4 +55,6 @@ export class BooksService {
   remove(id: number) {
     return `This action removes a #${id} book`;
   }
+
+  async follow(createBookDto: CreateBookDto, user: IUser) {}
 }

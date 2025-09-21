@@ -11,7 +11,8 @@ import {
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
-import { Public, ResponseMessage } from 'src/decorator/customize';
+import { Public, ResponseMessage, User } from 'src/decorator/customize';
+import { IUser } from 'src/users/user.interface';
 
 @Controller('books')
 export class BooksController {
@@ -46,5 +47,10 @@ export class BooksController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.booksService.remove(+id);
+  }
+
+  @Post('/follow-book')
+  followBook(@Body() createBookDto: CreateBookDto, @User() user: IUser) {
+    return this.booksService.follow(createBookDto, user);
   }
 }
