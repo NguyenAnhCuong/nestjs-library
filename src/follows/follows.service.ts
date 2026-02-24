@@ -75,18 +75,6 @@ export class FollowsService {
     };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} follow`;
-  }
-
-  update(id: number, updateFollowDto: UpdateFollowDto) {
-    return `This action updates a #${id} follow`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} follow`;
-  }
-
   async toggleFollow(createFollowDto: CreateFollowDto, user: IUser) {
     const { bookId } = createFollowDto;
 
@@ -141,5 +129,74 @@ export class FollowsService {
     });
 
     return !!follow; // true nếu đã follow
+  }
+
+  async recommendBooks(
+    currentPage: number,
+    limit: number,
+    queryString: string,
+    user: IUser,
+  ) {
+    const aqp = (await import('api-query-params')).default;
+    const { filter, sort } = aqp(queryString);
+    const userId = user._id;
+    delete filter.current;
+    delete filter.pageSize;
+    let offset = (+currentPage - 1) * +limit;
+    let defaultLimit = +limit ? +limit : 10;
+
+    // 1️⃣ Lấy book đã follow
+    const follows = await this.FollowModel.find({
+      userId,
+      isDeleted: false,
+    }).select('bookId');
+
+    const followedBookIds = follows.map((f) => f.bookId);
+
+    let finalFilter: any = {
+      isDeleted: false,
+      ...filter,
+    };
+
+    // 2️⃣ Nếu user đã follow
+    if (followedBookIds.length) {
+      const followedBooks = await this.BookModel.find({
+        _id: { $in: followedBookIds },
+        isDeleted: false,
+      }).select('categories');
+
+      const categories = [
+        ...new Set(followedBooks.flatMap((b) => b.categories || [])),
+      ];
+
+      if (categories.length) {
+        finalFilter.categories = { $in: categories };
+        finalFilter._id = { $nin: followedBookIds };
+      }
+    } else {
+      // 3️⃣ Fallback trending nếu chưa follow gì
+      finalFilter._id = { $exists: true };
+    }
+
+    // 4️⃣ Đếm tổng
+    const totalItems = await this.BookModel.countDocuments(finalFilter);
+    const totalPages = Math.ceil(totalItems / defaultLimit);
+
+    // 5️⃣ Query data
+    const result = await this.BookModel.find(finalFilter)
+      .sort({ average_rating: -1, ratings_count: -1 })
+      .skip(offset)
+      .limit(limit)
+      .exec();
+
+    return {
+      meta: {
+        current: currentPage,
+        pageSize: limit,
+        pages: totalPages,
+        total: totalItems,
+      },
+      result,
+    };
   }
 }

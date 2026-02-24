@@ -35,24 +35,22 @@ export class FollowsController {
     return this.followsService.findAll(+currentPage, +limit, qs, user);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.followsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateFollowDto: UpdateFollowDto) {
-    return this.followsService.update(+id, updateFollowDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.followsService.remove(+id);
-  }
-
   @Get('/check/:bookId')
   @ResponseMessage('Check Follow book by user')
   async checkFollow(@Param('bookId') bookId: string, @User() user: IUser) {
     return this.followsService.checkIsFollowed(bookId, user);
+  }
+
+  @Get('/recommend')
+  @ResponseMessage('Recommend books for user')
+  recommendBooks(
+    @Query('current') currentPage: string,
+    @Query('pageSize') limit: string,
+    @Query() qs: string,
+    @User() user: IUser,
+  ) {
+    console.log('recoomend', user);
+
+    return this.followsService.recommendBooks(+currentPage, +limit, qs, user);
   }
 }
