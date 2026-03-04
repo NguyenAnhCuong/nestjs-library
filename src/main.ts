@@ -31,7 +31,7 @@ async function bootstrap() {
 
   app.useStaticAssets(join(__dirname, '..', 'public')); //js,css
 
-  const port = configService.get<string>('PORT') || 8888;
-  await app.listen(port);
+  const port = Number(process.env.PORT) || 8888;
+  await app.listen(port, '0.0.0.0');
 }
 bootstrap();
